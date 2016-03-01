@@ -1,0 +1,259 @@
+
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel" data-fill-color="true">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="icon-note fa-fw"></i> Create New Address</h3>
+            </div><!-- /panel-heading -->
+            <!-- panel-body -->
+            <div class="panel-body">
+                <form role="form" id="create-new-addresses-form">
+                    <div class="form-group" hidden>
+                        <input value="@Model.Id" type="text" class="form-control" id="UrlId" placeholder="" name="Id">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Latitude">Latitude:</label>
+                        <input type="text" class="form-control" id="Latitude" name="Latitude">
+                    </div>
+                    <div class="form-group">
+                        <label for="Longitude">Longitude:</label>
+                        <input type="text" class="form-control" id="Longitude" name="Longitude">
+                    </div>
+                    <div class="form-group">
+                        <label for="AddressLine1">AddressLine1:</label>
+                        <input type="text" class="form-control" id="AddressLine1" name="AddressLine1">
+                    </div>
+                    <div class="form-group">
+                        <label for="AddressLine2">AddressLine2:</label>
+                        <input type="text" class="form-control" id="AddressLine2" name="AddressLine2">
+                    </div>
+                    <div class="form-group">
+                        <label for="City">City:</label>
+                        <input type="text" class="form-control" id="City" name="City">
+                    </div>
+                    <div class="form-group">
+                        <label for="Countries">Country:</label>
+                        <select class="CountriesList" id="Country" name="Country">
+                            <option value="C0"> Please select a Country</option>
+                            @foreach (Datalus.Web.Domain.Country c in Model.Countries)
+                            {
+                                <option id="@String.Format("C{0}", c.CountryId)" value="@c.CountryId">@c.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="State">State:</label>
+                        <select class="StatesList" id="State" name="State">
+                            <option id="S0" value="0"> Please select a State</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ZipCode">ZipCode:</label>
+                        <input type="text" class="form-control" id="ZipCode" name="ZipCode">
+                    </div>
+                    <button type="button" id="create-new-addresses-form-button" class="btn btn-primary">Submit Addresses</button>
+                    <button type="button" id="deleteButton" class="btn btn-primary">Delete Address</button>
+                </form>
+            </div>
+            <div class="alert" id="msgWindow"></div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/datalus.services.addresses.js"></script>
+<script type="text/javascript">
+    datalus.page.addressesId = @Model.Id;
+    var stateID = -1;
+    var IdValue = datalus.page.addressesId;
+
+    datalus.page.startUp = function ()
+    {
+        $("#create-new-addresses-form").on("click","#create-new-addresses-form-button", datalus.page.handlers.onAddressesFormSubmit);
+        if(datalus.page.addressesId  != 0){
+            datalus.services.addresses.ajaxGetById(IdValue, datalus.page.ajaxGetSuccess);
+        }
+
+        datalus.page.initializeValidation();
+        datalus.page.stateDropDown = $('.StatesList');
+        $(".CountriesList").on("change", datalus.page.onCountrySelect);
+        $("#deleteButton").on("click", datalus.services.addresses.onDeleteAddress(IdValue, datalus.page.AjaxDeleteSuccess, datalus.page.AjaxError));
+    };
+
+    datalus.page.initializeValidation = function ()
+    {
+        jQuery.validator.setDefaults({
+            debug: true
+        });
+        $('#create-new-addresses-form').validate({
+            rules: {
+                "Id": {
+                    required: false,
+                },
+                "Latitude": {
+                    required: false,
+                },
+                "Longitude": {
+                    required: false,
+                },
+                "AddressLine1": {
+                    required: true
+                },
+                "AddressLine2": {
+                    required: false
+                },
+                "City": {
+                    required: true,
+                },
+                "State": {
+                    required: true,
+                },
+                "ZipCode": {
+                    required: true,
+                }
+            },
+            messages: {
+                "AddressLine1": {
+                    required: "Address is required"
+                },
+                "City": {
+                    required: "City is required"
+                },
+                "State": {
+                    required: "State is required"
+                },
+                "ZipCode": {
+                    required: "ZipCode is required"
+                }
+            }
+        });
+    };
+
+    datalus.page.handlers.onAddressesFormSubmit = function ()
+    {
+        if($('#create-new-addresses-form').validate()) {
+            console.log($("#create-new-addresses-form").serialize());
+
+            var valueId = $('#UrlId').attr("value");
+            if (valueId != 0) {
+                datalus.services.addresses.ajaxUpdate(valueId, datalus.page.AjaxUpdateSuccess, datalus.page.AjaxError);
+            }
+            else {
+                datalus.services.addresses.ajaxCreate(datalus.page.AjaxCreateSuccess, datalus.page.AjaxError);
+            }
+        }
+    };
+
+    datalus.page.AjaxCreateSuccess = function (data, status, xhr) {
+        if(data && data.item)
+        {
+            var result = JSON.stringify(data);
+            console.log(result);
+            $("#msgWindow").removeClass("alert-danger");
+            $("#msgWindow").addClass("alert-info");
+            $('#msgWindow').text(result);
+            $('#Id').attr("value", data.item);
+        }
+    }
+
+    datalus.page.AjaxUpdateSuccess = function (data, status, xhr) {
+        if(!data || !data.item)
+        {
+            return;
+        }
+        var result = JSON.stringify(data);
+        console.log(result);
+        $("#msgWindow").removeClass("alert-danger");
+        $("#msgWindow").addClass("alert-info");
+        $('#msgWindow').text(result);
+    }
+
+    datalus.page.ajaxGetSuccess = function (data, status, xhr) {
+        $("#Latitude").attr("value", data.item.latitude);
+        $("#Longitude").attr("value", data.item.longitude);
+        $("#AddressLine1").attr("value", data.item.addressLine1);
+        $("#AddressLine2").attr("value", data.item.addressLine2);
+        $("#City").attr("value", data.item.city);
+        $("#ZipCode").attr("value", data.item.zipCode);
+
+        $("#C" + data.item.country).attr("selected", true); //selecting country
+        stateID = data.item.state;
+        datalus.page.onCountrySelect(); //pulls all states based on selected country
+        //$("#S" + data.item.state).attr("selected", true); //selecting country
+        //alert(JSON.stringify(data.item));
+
+        console.log(data);
+        console.log(data.item.latitude
+            , data.item.longitude
+            , data.item.addressLine1
+            , data.item.addressLine2
+            , data.item.city
+            , data.item.state
+            , data.item.zipCode
+            );
+    }
+
+    datalus.page.onCountrySelect = function(){
+        var IdValue = $('.CountriesList').find(":selected").val();
+        var url = "/api/addresses/StateProvinces/country/" + IdValue;
+        var settings = {
+            cache: false
+            , contentType: "application/x-www-form-urlencoded; charset=UTF-8"
+            , dataType: "json"
+            , success: datalus.page.ajaxGetListofStates
+            , error: datalus.page.ajaxError
+            , type: "GET"
+        };
+        $.ajax(url, settings);
+    }
+
+    datalus.page.ajaxGetListofStates = function(data, status, xhr){
+        datalus.page.stateDropDown.empty();
+        if (data.items) {
+            for (i=0; i<data.items.length; i++){
+                var currentState = data.items[i];
+                datalus.page.stateDropDown.append('<option id="S' + currentState.stateProvinceId +'"  value="' + currentState.stateProvinceId + '">' + currentState.name + '</option>');
+            }
+
+            if(stateID != -1)
+            {
+                $("#S" + stateID).attr("selected", true);
+            }
+        };
+    }
+
+    datalus.page.handlers.deleteButton = function () {
+        IdValue = $(this);
+        datalus.services.addresses.onDeleteAddress(IdValue.attr("value"), datalus.page.ajaxDeleteSuccess, datalus.page.ajaxDeleteError);
+    }
+
+    datalus.page.ajaxDeleteSuccess = function (data, status, xhr) {
+        console.log(data);
+        console.log(IdValue);
+    }
+
+    datalus.page.ajaxDeleteError = function (jqXHR, textStatus, errorThrown) {
+        $("#msgWindow").addClass("alert-danger");
+        $("#msgWindow").removeClass("alert-info");
+        //$("msgWindow").text(result);
+        console.log(jqXHR);
+        console.log(errorThrown);
+        console.log(textStatus);
+    }
+
+    datalus.page.AjaxError = function (jqXHR, textStatus, errorThrown) {
+        $("#msgWindow").addClass("alert-danger");
+        $("#msgWindow").removeClass("alert-info");
+    };
+
+</script>
+        }
+
+
+
+
+
