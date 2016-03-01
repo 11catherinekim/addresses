@@ -1,0 +1,308 @@
+@model Datalus.Web.Models.ViewModels.AddressesViewModel
+
+<! DOCTYPE html>
+html class = "no-js" lang="en">
+
+<head>
+@* removed head content for snippet brevity *@
+</head>
+
+<body>
+<main data-ng-app="datalusApp" class="wrapkit-wrapper" id="wrapper">
+<div class="row" data-ng-controller="addressesController as dashboard" id="AddressesCtrler">
+    <div class="col-md-6">
+        <div class="panel" data-fill-color="true">
+            <div class="panel-heading">
+                <h3 class="addressTitle"><i class="icon-note fa-fw"></i><span ng-bind="dashboard.addressTitle"></span></h3>
+            </div><!-- /panel-heading -->
+            <!-- panel-body -->
+            <div class="panel-body">
+                <form role="form" id="AddressForm" name="dashboard.AddressForm" ng-submit="dashboard.createAddress()" novalidate>
+                    <div class="form-group" hidden>
+                        <input ng-init="@Model.Id"
+                               ng-model="dashboard.address.id"
+                               type="text"
+                               class="form-control"
+                               id="Id"
+                               name="Id">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label" for="addressline1">Address Line 1</label>
+                        <input type="text"
+                               class="form-control ng-class:{'error': dashboard.showFormErrors && !dashboard.AddressForm.addressline1.$valid}"
+                               name="addressline1"
+                               placeholder="Street address, P.O. Box, Company Name..."
+                               data-ng-model="dashboard.address.addressLine1"
+                               ng-minlength="5"
+                               ng-maxlength="100"
+                               required />
+                        <div role="alert" class="help-inline error">
+                            <span class="error" ng-show="dashboard.showFormErrors && dashboard.AddressForm.addressline1.$error.required">Address Line 1 is required</span>
+                            <span class="error" ng-show="dashboard.showFormErrors && dashboard.AddressForm.addressline1.$error.minlength">Too short! Address must be at least 5 characters</span>
+                            <span class="error" ng-show="dashboard.showFormErrors && dashboard.AddressForm.addressline1.$error.maxlength">Too long! Address must be 100 characters or less</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" ng-class="error('addressLine2')">
+                        <label class="control-label" for="addressline2">Address Line 2</label>
+                        <input type="text"
+                               class="form-control"
+                               name="addressLine2"
+                               id="addressLine2"
+                               placeholder="apartment, suit, unit building, floor... etc."
+                               data-ng-model="dashboard.address.addressLine2" />
+                    </div>
+                    <div class="form-group" ng-class="error('city')">
+                        <label class="control-label" for="city">City</label>
+                        <input type="text"
+                               class="form-control ng-class:{'error': dashboard.showFormErrors && !dashboard.AddressForm.city.$valid}"
+                               name="city"
+                               id="city"
+                               placeholder="Please enter your city"
+                               data-ng-model="dashboard.address.city"
+                               ng-minlength="2"
+                               ng-maxlength="50"
+                               required />
+                        <div role="alert" class="help-inline error">
+                            <span class="error" ng-show="dashboard.showFormErrors && dashboard.AddressForm.city.$error.required">City is required</span>
+                            <span class="error" ng-show="dashboard.showFormErrors && dashboard.AddressForm.city.$error.minlength">Too short! City must be at least 2 characters</span>
+                            <span class="error" ng-show="dashboard.showFormErrors && dashboard.AddressForm.city.$error.maxlength">Too long! City must be 50 characters or less</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" ng-class="error('countries')">
+                        <label for="Countries">Country:</label>
+                        <select class="form-control ng-class:{'error': dashboard.showFormErrors && !dashboard.AddressForm.countries.$valid}"
+                                id="countries"
+                                name="countries"
+                                data-ng-model="dashboard.address.countryId"
+                                data-ng-options="country.countryId as country.name for country in dashboard.countries"
+                                data-ng-change="dashboard.onCountryChange()"
+                                required>
+                            <option value="C0">Please select a Country</option>
+                        </select>
+                        <div role="alert" class="help-inline error">
+                            <span class="error" ng-show="dashboard.showFormErrors && dashboard.AddressForm.countries.$error.required">Country is required</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" ng-class="error('state')">
+                        <label class="control-label" for="state">State</label>
+                        <select type="text"
+                                class="form-control ng-class:{'error': dashboard.showFormErrors && !dashboard.AddressForm.state.$valid}"
+                                name="state"
+                                id="state"
+                                data-ng-options="state.stateProvinceId as state.name for state in dashboard.states"
+                                placeholder="State"
+                                data-ng-model="dashboard.address.stateProvinceId"
+                                required>
+                            <option id="S0" value="0"> Please select a State</option>
+                        </select>
+                        <div role="alert" class="help-inline error">
+                            <span class="error" ng-show="dashboard.showFormErrors && dashboard.AddressForm.state.$error.required">State is required</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" ng-class="error('zipCode')">
+                        <label class="control-label" for="zipCode">ZipCode</label>
+                        <input class="form-control ng-class:{'error': dashboard.showFormErrors && !dashboard.AddressForm.zipCode.$valid}"
+                               name="zipCode"
+                               type="text"
+                               id="zipCode"
+                               placeholder="Please enter the zipcode"
+                               required
+                               data-ng-model="dashboard.address.zipCode"
+                               ng-minlength="3"
+                               ng-maxlength="15">
+                        <div role="alert" class="help-inline error">
+                            <span class="error" ng-show="dashboard.showFormErrors && dashboard.AddressForm.zipCode.$error.required">ZipCode is required</span>
+                            <span class="error" ng-show="dashboard.showFormErrors && dashboard.AddressForm.zipCode.$error.minlength">Too short! ZipCode must be at least 3 characters</span>
+                            <span class="error" ng-show="dashboard.showFormErrors && dashboard.AddressForm.zipCode.$error.maxlength">Too long! ZipCode must be 15 characters or less</span>
+                        </div>
+                    </div>
+                    <div class="pull-right mb-1x" id="formButtons">
+                        <button type="submit" id="create-new-addresses-form-button" class="btn btn-primary"><span ng-bind="dashboard.submitButtonName"></span></button>
+                        <button type="button" id="deleteButton" class="btn btn-primary" data-toggle="modal" ng-class="dashboard.deleteAddress" data-ng-click="dashboard.deleteAddress()">Delete Address</button>
+                        <a href="/Addresses" id="cmdCancel" class="btn btn-default"><span ng-bind="dashboard.cancelButtonName"></span></a>
+                        <button type="reset" id="cmdReset" class="btn btn-info" ng-click="dashboard.resetForm()" ng-class="dashboard.resetFormButton">Reset</button>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+
+
+
+@section scripts{
+    <script src="~/Scripts/datalus.services.addresses.js"></script>
+    <script>
+        datalus.page.addressId = @Model.Id;
+    </script>
+    <script type="text/javascript">
+        var stateID = -1;
+
+        (function() {
+            'use strict';
+
+            angular.module(APPNAME)
+                .factory('$addressesService', AddressesServiceFactory);
+
+            AddressesServiceFactory.$inject = ['$baseService', '$datalus'];
+
+            function AddressesServiceFactory($baseService, $datalus) {
+                var myAddressesServiceObject = datalus.services.addresses;
+                var newService = $baseService.merge(true, {}, myAddressesServiceObject, $baseService);
+                console.log(myAddressesServiceObject);
+                return newService;
+            }
+        })();
+
+        (function() {
+            'use strict';
+
+            angular.module(APPNAME)
+                .controller("addressesController", AddressesController);
+
+            AddressesController.$inject = ['$scope', '$baseController', '$addressesService'];
+
+            function AddressesController($scope, $baseController, $addressesService) {
+                var vm = this;//this points to a new {}
+
+                vm.address = null;
+                vm.showFormErrors = false;
+
+                vm.$addressesService = $addressesService;
+                vm.$scope = $scope;
+                vm.addressTitle = "Create Address";
+                vm.submitButtonName = "Submit Address";
+                vm.cancelButtonName = "Cancel";
+                vm.resetButtonClass = "Reset Address";
+
+                vm.createAddress = _createAddress;
+                vm.onCreateSuccess = _onCreateSuccess;
+                vm.getCountries = _getCountries;
+                vm.countries = null;
+                vm.onCountryChange = _onCountryChange;
+                vm.getStates = _getStates;
+                vm.states = null;
+                vm.deleteAddress = _deleteAddress;
+                vm.onGetByIdSuccess = _onGetByIdSuccess;
+                vm.updateAddSuccess = _updateAddSuccess;
+                vm.deleteSuccess = _deleteSuccess;
+                vm.onAddressError = _onAddressError;
+
+                vm.editAddressPage = _editAddressPage;
+                vm.resetForm = _resetForm;
+
+                $baseController.merge(vm, $baseController);
+                vm.notify = vm.$addressesService.getNotifier($scope);
+
+                render();
+
+                function render() {
+                    vm.$addressesService.getCountries(vm.getCountries, vm.onAddressError);
+                }
+
+                function _createAddress(){
+                    vm.showFormErrors = true;
+                    if (vm.AddressForm.$valid, vm.address) {
+                        console.log("data is valid! go save this object -> ", vm.address)
+                        if (datalus.page.addressId > 0){
+                            vm.$addressesService.updateAddress(datalus.page.addressId, vm.address, vm.updateAddSuccess, vm.onAddressError)
+                        }
+                        else{
+                            vm.$addressesService.createNewAddress(vm.address, vm.onCreateSuccess, vm.onAddressError)
+                        }
+                    }
+                    else {
+                        console.log("form submitted with invalid data :(")
+                    }
+                }
+
+                function _deleteAddress(){
+                    vm.$addressesService.onDeleteAddress(datalus.page.addressId, vm.deleteSuccess, vm.onAddressError)
+                }
+
+                function _getCountries(data){
+                    vm.notify(function(){
+                        vm.countries = data.items;
+                    });
+                    if (datalus.page.addressId != 0) {
+                        vm.$addressesService.getAddressById(datalus.page.addressId, vm.onGetByIdSuccess, vm.onAddressError);
+                    }
+                }
+
+                function _onCountryChange(){
+                    vm.$addressesService.getStatesForCountry(vm.address.countryId, vm.getStates, vm.onAddressError);
+                };
+
+                function _updateAddSuccess(){
+                    vm.notify(function(){
+                        vm.states = data.items;
+                    });
+                    vm.$alertService.info("Change Saved");
+                }
+
+                function _getStates(data){
+                    vm.notify(function(){
+                        vm.states = data.items;
+                    });
+                }
+
+                function _editAddressPage(){
+                    vm.addressTitle = "Edit Address";
+                    vm.submitButtonName = "Submit Changes";
+                    vm.cancelButtonName = "Cancel Changes";
+                    vm.deleteAddressButton = true;
+                    vm.resetButtonClass = "Reset";
+                }
+
+                function _resetForm(){
+                    vm.submitButtonName = "Submit"
+                    vm.AddressForm.$setPristine();
+                    vm.AddressForm.$setUntouched();
+                    vm.$alertService.info("Form reset");
+                }
+
+                function _onCreateSuccess(data){
+                    vm.notify(function () {
+                        vm.$log.log('post success... ' + data);
+                        vm.$alertService.success("Create was Successful");
+                        datalus.page.addressId = data.item;
+                        vm.address.id = data.item;
+                        vm.editAddressPage();
+                    });
+                }
+
+                function _onGetByIdSuccess(data) {
+                    vm.notify(function(){
+                        vm.address = data.item;
+                    });
+                    vm.onCountryChange();
+                    vm.stateProvinceId = data.item;
+                    console.log(data.item);
+                    vm.submitButtonName = "Submit Changes";
+                    vm.cancelButtonName = "Cancel Changes";
+                }
+
+                function _deleteSuccess(){
+                    vm.$alertService.success("Address Deleted");
+                    vm.AddressForm.$setPristine();
+                    vm.AddressForm.$setUntouched();
+                }
+
+                function _onAddressError(jqXHR, textStatus, errorThrown) {
+                    vm.notify(function(){
+                        vm.$alertService.info("An Error Occurred")
+                    })
+                }
+            }
+        })();
+    </script>
+}
+</body>
+</html>
