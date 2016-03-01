@@ -1,0 +1,42 @@
+<script type="text/javascript" src="~/Scripts/jquery.validate.js"></script>
+        <script src="~/Scripts/datalus.services.addresses.js"></script>
+        <script type="text/javascript">
+
+            datalus.page.startUp = function () {
+                datalus.services.addresses.ajaxGetAll(datalus.page.AjaxSuccess, datalus.page.AjaxError);
+            };
+
+            datalus.page.populateAddresses = function (arrAddress) {
+                for (var i = 0; i < arrAddress.items.length; i++) {
+                    var currentAdd = arrAddress.items[i];
+                    datalus.page.addAddress(currentAdd);
+                }
+                $('.panel.col-md-4.addressform:first').remove();
+            };
+
+            datalus.page.addAddress = function (currentAdd) {
+                var newblankAddress = $('.col-md-4.addressform:last').clone();
+                newblankAddress.find('.blankAddress1').text(currentAdd.addressLine1);
+                newblankAddress.find('.blankAddress2').text(currentAdd.addressLine2);
+                newblankAddress.find('.blankCity').text(currentAdd.city)
+                newblankAddress.find('.blankState').text(currentAdd.stateProvincesName);
+                newblankAddress.find('.blankCountry').text(currentAdd.countriesName);
+                newblankAddress.find('.blankZipCode').text(currentAdd.zipCode);
+                $(".outerform").append(newblankAddress);
+            };
+
+            datalus.page.AjaxSuccess = function (data, status, xhr) {
+                var result = JSON.stringify(data);
+                console.log(result);
+                $("#msgWindow").removeClass("alert-danger");
+                $("#msgWindow").addClass("alert-info");
+                $('#msgWindow').text(result);
+                datalus.page.populateAddresses(data);
+            };
+
+            datalus.page.AjaxError = function (jqXHR, textStatus, errorThrown) {
+                $("#msgWindow").addClass("alert-danger");
+                $("#msgWindow").removeClass("alert-info");
+            }
+
+        </script>
