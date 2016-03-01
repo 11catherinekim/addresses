@@ -1,0 +1,96 @@
+@model Datalus.Web.Models.ViewModels.AddressesViewModel
+@{
+    ViewBag.Title = "Index";
+}
+<div class="content-body" data-ng-controller="addressesController as dashboard" id="addressesCntrl">
+    <div class="row">
+    <div class="outerform">
+        <div class="col-md-4 addressform" data-ng-repeat="address in dashboard.addresses">
+            <div class="panel">
+                <div class="embed-responsive embed-responsive-16by9 text-light">
+                        <img class="addressMap" ng-src="{{address.url}}">
+                    </div>
+                <div class="content-body Addressbody">
+                    <div class="row animate-repeat">
+                        <div class="clearfix"></div>
+                        <div class="help-block">
+                            <h4 align="center" style="font-weight:bold" class="blankAddress1">{{address.addressLine1}}</h4>
+                            <h4 align="center" style="font-weight:bold" class="blankAddress2">{{address.addressLine2}}</h4>
+                            <h4 align="center" style="font-weight:bold" class="blankCity">{{address.city}}</h4>
+                            <h4 align="center" style="font-weight:bold" class="blankCountry">{{address.countriesName}}</h4>
+                            <h4 align="center" style="font-weight:bold" class="blankState">{{address.stateProvincesName}}</h4>
+                            <h4 align="center" style="font-weight:bold" class="blankZipCode">{{address.zipCode}}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+@section Scripts {
+    <script type="text/javascript" src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/datalus.services.addresses.js"></script>
+    <script type="text/javascript">
+
+        (function () {
+            "use strict";
+
+            angular.module(APPNAME)
+                .factory('$addressesService', AddressesServiceFactory);
+
+            AddressesServiceFactory.$inject = ['$baseService', '$datalus'];
+
+            function AddressesServiceFactory($baseService, $datalus) {
+                var adatalusServiceObject = datalus.services.addresses;
+                var newService = $baseService.merge(true, {}, adatalusServiceObject, $baseService);
+                return newService;
+            }
+
+        })();
+
+        (function () {
+            "use strict";
+
+            angular.module(APPNAME)
+                .controller('addressesController', AddressesController);
+
+            AddressesController.$inject = ['$scope', '$baseController', "$addressesService"];
+
+            function AddressesController($scope, $baseController, $addressesService) {
+                var vm = this;//this points to a new {}
+                vm.addresses = null;
+
+                vm.$addressesService = $addressesService;
+                vm.$scope = $scope;
+
+                vm.receiveItems = _receiveItems;
+                vm.onAddressError = _onAddressError;
+                $baseController.merge(vm, $baseController);
+                vm.notify = vm.$addressesService.getNotifier($scope);
+
+                render();
+
+                function render() {
+                    vm.$addressesService.getAllAddresses(vm.receiveItems, vm.onAddressError);
+                }
+
+                function _receiveItems(data) {
+                    vm.notify(function () {
+                        vm.addresses = data.items;
+                        for (var i = 0; i < vm.addresses.length; i++) {
+                            vm.addresses[i].url = "https://maps.googleapis.com/maps/api/staticmap?center=" + vm.addresses[i].addressLine1 + vm.addresses[i].city + "," + vm.addresses[i].stateProvincesName + "&zoom=15&size=333x214&key=AIzaSyAYytLcYZLjooQXvMJPmieY_Y7XiKKYLag";
+                        }
+                        console.log(vm.addresses);
+                    });
+                }
+
+                function _onAddressError(jqXhr, error) {
+                    console.error(error);
+                }
+            }
+        })();
+
+    </script>
